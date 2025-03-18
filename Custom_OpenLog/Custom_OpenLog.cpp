@@ -67,3 +67,38 @@ void Custom_OpenLog::remove(char* filename) {
 void Custom_OpenLog::removeDirectory(char* dir) {
 	
 }
+
+char* Custom_OpenLog::readRegister(uint8_t reg, char* data, unsigned long num) {
+	Wire.beginTransmission(_address);
+	Wire.write(reg);  // I'm guessing this is how the register is accessed.
+	Wire.endTransmission();
+	
+	unsigned long i = 0;
+	Wire.requestFrom(_address, num);
+	while (Wire.available() && i < num) {
+		data[i++] = Wire.read();
+	}
+	
+	return data;
+}
+
+char* Custom_OpenLog::readRegister(uint8_t reg, char* dataIn, char* dataOut, unsigned long num) {
+	writeRegister(reg, dataIn);
+	
+	i = 0;
+	Wire.requestFrom(_address, num);
+	while (Wire.available() && i < num) {
+		data[i++] = Wire.read();
+	}
+	return dataOut;
+}
+
+void Custom_OpenLog::writeRegister(uint8_t reg, char* data) {
+	unsigned long i = 0;
+	Wire.beginTransmission(_address);
+	Wire.write(reg);  // I'm guessing this is how the register is accessed.
+	while (data[i] != '\0') {
+		Wire.write(data[i++]);
+	}
+	Wire.endTransmission();
+}
