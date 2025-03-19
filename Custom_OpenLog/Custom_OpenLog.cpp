@@ -1,3 +1,6 @@
+#ifndef CUSTOM_OPENLOG_CPP
+#define CUSTOM_OPENLOG_CPP
+
 #include <Arduino.h>
 #include <Wire.h>
 #include "Custom_OpenLog.h"
@@ -16,9 +19,11 @@ bool Custom_OpenLog::begin() {
 	return true;
 }
 
-void Custom_OpenLog::getStatus(uint8_t* status) {
-	Wire.requestFrom(_address, 1);
-	&status = Wire.read();
+void Custom_OpenLog::getStatus(char* status) {
+	//Wire.requestFrom(_address, 1);
+	//&status = Wire.read();
+	
+	(void)readRegister(0x01, status, 1);
 }
 
 void Custom_OpenLog::createFile(char* filename) {
@@ -51,7 +56,7 @@ void Custom_OpenLog::writeFile(char* str) {
 
 
 unsigned long Custom_OpenLog::fileSize(char* filename) {
-	
+	return 0;
 }
 
 
@@ -68,7 +73,7 @@ void Custom_OpenLog::removeDirectory(char* dir) {
 	
 }
 
-char* Custom_OpenLog::readRegister(uint8_t reg, char* data, unsigned long num) {
+char* Custom_OpenLog::readRegister(uint8_t reg, char* dataOut, unsigned long num) {
 	Wire.beginTransmission(_address);
 	Wire.write(reg);  // I'm guessing this is how the register is accessed.
 	Wire.endTransmission();
@@ -76,29 +81,31 @@ char* Custom_OpenLog::readRegister(uint8_t reg, char* data, unsigned long num) {
 	unsigned long i = 0;
 	Wire.requestFrom(_address, num);
 	while (Wire.available() && i < num) {
-		data[i++] = Wire.read();
+		dataOut[i++] = Wire.read();
 	}
 	
-	return data;
+	return dataOut;
 }
 
 char* Custom_OpenLog::readRegister(uint8_t reg, char* dataIn, char* dataOut, unsigned long num) {
 	writeRegister(reg, dataIn);
 	
-	i = 0;
+	unsigned long i = 0;
 	Wire.requestFrom(_address, num);
 	while (Wire.available() && i < num) {
-		data[i++] = Wire.read();
+		dataOut[i++] = Wire.read();
 	}
 	return dataOut;
 }
 
-void Custom_OpenLog::writeRegister(uint8_t reg, char* data) {
+void Custom_OpenLog::writeRegister(uint8_t reg, char* dataIn) {
 	unsigned long i = 0;
 	Wire.beginTransmission(_address);
 	Wire.write(reg);  // I'm guessing this is how the register is accessed.
-	while (data[i] != '\0') {
-		Wire.write(data[i++]);
+	while (dataIn[i] != '\0') {
+		Wire.write(dataIn[i++]);
 	}
 	Wire.endTransmission();
 }
+
+#endif
